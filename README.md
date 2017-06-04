@@ -7,6 +7,6 @@ However, for more static scenes we can use the software backend (aka 2D Renderer
 
 Using QQuickRenderControl and a few (for now?) private APIs we can redirect the output into a QImage. The rest is straightforward and we will end up with a VkImage.
 
-Obviously not suitable for heavily animated, dynamic content but is good enough for somet things. (dirty tracking is active though so only changed areas are pushed to texture mem)
+Obviously not suitable for heavily animated, dynamic content but is good enough for some things. (dirty tracking is active though so only changed areas are pushed to texture mem)
 
 Needs Qt 5.10 (dev branch of qtbase/qtdeclarative as of now).

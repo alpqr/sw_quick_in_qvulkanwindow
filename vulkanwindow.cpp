@@ -509,7 +509,7 @@ void VulkanRenderer::initSwapChainResources()
 {
     qDebug("initSwapChainResources");
 
-    m_mvp = *m_window->clipCorrectionMatrix();
+    m_mvp = m_window->clipCorrectionMatrix();
     const QSize sz = m_window->swapChainImageSize();
     m_mvp.perspective(45.0f, sz.width() / (float) sz.height(), 0.01f, 100.0f);
     m_mvp.translate(0, 0, -4);
