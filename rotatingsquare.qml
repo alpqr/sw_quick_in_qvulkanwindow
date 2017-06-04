@@ -42,20 +42,35 @@ import QtQuick 2.0
 
 Rectangle {
     id: root
+    border.color: "black"
+    border.width: 2
     color: "transparent"
 
     Rectangle {
         property int d: 100
+        Behavior on d { NumberAnimation { duration: 500; easing.type: Easing.InQuad } }
         id: square
         width: d
         height: d
         anchors.centerIn: parent
-        color: "red"
+        color: ma.pressed ? "blue" : "red"
         NumberAnimation on rotation { from: 0; to: 360; duration: 2000; loops: Animation.Infinite; }
+        MouseArea {
+            id: ma
+            anchors.fill: parent
+            onClicked: square.d += 50
+        }
     }
 
     Text {
         anchors.centerIn: parent
-        text: "Software Qt Quick running\nin a QVulkanWindow"
+        text: "Live, software-rendered Qt Quick scene\nas a texture in a QVulkanWindow"
+    }
+
+    Text {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        color: "lightGray"
+        text: "Mouse input is mapped too, click the rectangle..."
     }
 }

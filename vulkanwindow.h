@@ -74,6 +74,9 @@ public:
 
     void startNextFrame() override;
 
+    QMatrix4x4 modelView() const { return m_modelView; }
+    QMatrix4x4 projection() const { return m_projection; }
+
 private:
     bool createTextureImage(int count, const QSize &size, VkImage *image, VkDeviceMemory *mem,
                             VkImageTiling tiling, VkImageUsageFlags usage, uint32_t memIndex);
@@ -108,6 +111,8 @@ private:
 
     VkSampler m_sampler = VK_NULL_HANDLE;
 
+    QMatrix4x4 m_modelView;
+    QMatrix4x4 m_projection;
     QMatrix4x4 m_mvp;
 };
 
@@ -137,6 +142,9 @@ private:
     //void resizeEvent(QResizeEvent *) override;
     void updateQuickSizes();
 
+    bool event(QEvent *) override;
+
+    VulkanRenderer *m_renderer;
     QQuickRenderControl *m_renderControl;
     QQuickWindow *m_quickWindow;
     QQmlEngine *m_qmlEngine;

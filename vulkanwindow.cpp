@@ -229,9 +229,50 @@ void VulkanWindowWithSwQuick::onScreenChanged()
         resizeQuickImage();
 }
 
+bool VulkanWindowWithSwQuick::event(QEvent *e)
+{
+    switch (e->type()) {
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseMove:
+    case QEvent::MouseButtonRelease:
+        if (m_quickWindow && m_renderer) {
+            QMouseEvent *me = static_cast<QMouseEvent *>(e);
+            QPointF p = me->localPos();
+
+            // Normally here comes the tricky part with picking, projecting, and
+            // whatnot. Our case in this example is somewhat simple since the
+            // quad's geometry is well-known and there is no rotation around X or Y.
+
+            const QSize sz = swapChainImageSize();
+            QVector3D tlv = QVector3D(-1, 1, 0).project(m_renderer->modelView(), m_renderer->projection(), QRect(QPoint(0, 0), sz));
+            QPointF tl(tlv.x(), tlv.y());
+            QVector3D brv = QVector3D(1, -1, 0).project(m_renderer->modelView(), m_renderer->projection(), QRect(QPoint(0, 0), sz));
+            QPointF br(brv.x(), brv.y());
+
+            if ((p.x() >= tl.x() && p.y() >= tl.y() && p.x() <= br.x() && p.y() <= br.y()) || e->type() == QEvent::MouseButtonRelease) {
+                // got a hit, now normalize
+                p -= tl;
+                p.setX(p.x() / (brv.x() - tlv.x() + 1));
+                p.setY(p.y() / (brv.y() - tlv.y() + 1));
+                // get a position in the Quick scene space
+                p = QPointF(p.x() / devicePixelRatio() * m_quickWindow->width(), p.y() / devicePixelRatio() * m_quickWindow->height());
+                // send
+                QMouseEvent mappedEvent(me->type(), p, me->screenPos(), me->button(), me->buttons(), me->modifiers());
+                QCoreApplication::sendEvent(m_quickWindow, &mappedEvent);
+                me->setAccepted(mappedEvent.isAccepted());
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return QVulkanWindow::event(e);
+}
+
 QVulkanWindowRenderer *VulkanWindowWithSwQuick::createRenderer()
 {
-    return new VulkanRenderer(this);
+    m_renderer = new VulkanRenderer(this);
+    return m_renderer;
 }
 
 VulkanRenderer::VulkanRenderer(VulkanWindowWithSwQuick *w)
@@ -511,10 +552,14 @@ void VulkanRenderer::initSwapChainResources()
 {
     qDebug("initSwapChainResources");
 
-    m_mvp = m_window->clipCorrectionMatrix();
+    m_projection = m_window->clipCorrectionMatrix();
     const QSize sz = m_window->swapChainImageSize();
-    m_mvp.perspective(45.0f, sz.width() / (float) sz.height(), 0.01f, 100.0f);
-    m_mvp.translate(0, 0, -4);
+    m_projection.perspective(45.0f, sz.width() / (float) sz.height(), 0.01f, 100.0f);
+
+    m_modelView.setToIdentity();
+    m_modelView.translate(0, 0, -4);
+
+    m_mvp = m_projection * m_modelView;
 }
 
 void VulkanRenderer::releaseSwapChainResources()
@@ -673,7 +718,7 @@ void VulkanRenderer::startNextFrame()
     const QSize sz = m_window->swapChainImageSize();
 
     static float g = 0.0f;
-    g += 0.01f;
+    g += 0.005f;
     if (g > 1.0f)
         g = 0.0f;
     VkClearColorValue clearColor = { 0, g, 0, 1 };
