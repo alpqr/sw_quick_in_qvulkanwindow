@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>rotatingsquare.qml</file>
+    <file>texture_vert.spv</file>
+    <file>texture_frag.spv</file>
+</qresource>
+</RCC>
