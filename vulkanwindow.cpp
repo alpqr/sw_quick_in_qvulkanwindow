@@ -260,6 +260,7 @@ bool VulkanWindowWithSwQuick::event(QEvent *e)
                 QMouseEvent mappedEvent(me->type(), p, me->screenPos(), me->button(), me->buttons(), me->modifiers());
                 QCoreApplication::sendEvent(m_quickWindow, &mappedEvent);
                 me->setAccepted(mappedEvent.isAccepted());
+                return true;
             }
         }
         break;
