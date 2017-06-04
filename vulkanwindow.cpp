@@ -62,8 +62,8 @@
 #include <QtQuick/private/qquickwindow_p.h>
 #include <QtQuick/private/qsgsoftwarerenderer_p.h>
 
-static const int QUICK_W = 256;
-static const int QUICK_H = 256;
+static const int QUICK_W = 512;
+static const int QUICK_H = 512;
 
 static float vertexData[] = {
     // x, y, z, u, v
@@ -215,6 +215,7 @@ void VulkanWindowWithSwQuick::resizeQuickImage()
     }
 }
 
+// Use a static (QUICK_W, QUICK_H) size for now
 //void VulkanWindowWithSwQuick::resizeEvent(QResizeEvent *)
 //{
 //    if (!m_quickImage.isNull() && m_quickImage.size() != size() * devicePixelRatio())
@@ -254,8 +255,8 @@ void VulkanRenderer::initResources()
     VkSamplerCreateInfo samplerInfo;
     memset(&samplerInfo, 0, sizeof(samplerInfo));
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerInfo.magFilter = VK_FILTER_NEAREST;
-    samplerInfo.minFilter = VK_FILTER_NEAREST;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
     samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
@@ -670,7 +671,11 @@ void VulkanRenderer::startNextFrame()
     VkCommandBuffer cb = m_window->currentCommandBuffer();
     const QSize sz = m_window->swapChainImageSize();
 
-    VkClearColorValue clearColor = { 0, 0, 0, 1 };
+    static float g = 0.0f;
+    g += 0.01f;
+    if (g > 1.0f)
+        g = 0.0f;
+    VkClearColorValue clearColor = { 0, g, 0, 1 };
     VkClearDepthStencilValue clearDS = { 1, 0 };
     VkClearValue clearValues[2];
     memset(clearValues, 0, sizeof(clearValues));
