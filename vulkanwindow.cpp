@@ -103,6 +103,7 @@ VulkanWindowWithSwQuick::VulkanWindowWithSwQuick()
     m_renderControl = new RenderControl(this);
 
     m_quickWindow = new QQuickWindow(m_renderControl);
+    m_quickWindow->setColor(Qt::transparent);
 
     m_qmlEngine = new QQmlEngine;
     if (!m_qmlEngine->incubationController())
